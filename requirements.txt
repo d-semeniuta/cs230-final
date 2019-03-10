@@ -1,13 +1,10 @@
-pytorch
-python==3.6
 ujson
 numpy
 spacy==2.0.16
 tensorboardX
 tqdm
 urllib3
-pytorch==1.0.0
+pytorch
 h5py
 librosa
-pip:
 torch==1.0.0

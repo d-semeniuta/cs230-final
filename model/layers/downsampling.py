@@ -6,7 +6,7 @@ import torch.nn.functional as F
 
 class DownsamplingBlock(nn.Module):
 
-    def __init__(self, num_channels_in, num_channels_out, filter_size):
+    def __init__(self, num_channels_in, num_channels_out, filter_size, params):
         """
         Initializes downsampling block. Doubles number of channels in the sample, halves dimension
 
@@ -19,7 +19,7 @@ class DownsamplingBlock(nn.Module):
 
         self.conv = nn.Conv1d(num_channels_in, num_channels_out, filter_size, stride=2, padding=filter_size//2)
         self.norm = nn.BatchNorm1d(num_channels_out)
-        self.relu = nn.ReLU()
+        self.relu = nn.LeakyReLU(params['relu'])
 
 
     def forward(self, input_signal):

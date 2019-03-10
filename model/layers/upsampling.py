@@ -6,21 +6,23 @@ import torch.nn.functional as F
 
 class UpsamplingBlock(nn.Module):
 
-    def __init__(self, num_channels_in, num_channels_out, filter_size, scale_ratio, neg_slope=0.2, drop_prob=0.5):
+    def __init__(self, num_channels_in, num_channels_out, filter_size, params):
         """
         Initializes upsampling block. halves number of channels in the sample, doubles dimension
 
         Args:
             num_channels_in (int): number of channels on input size of upsample
-            num_channels_out (int): number of channels on output size of upsample
+            num_channels_out (int): number of channels on output size of
+                upsample convolution
             filter_size (int): number of filters
         """
         super(UpsamplingBlock, self).__init__()
 
         self.conv = nn.Conv1d(num_channels_in, num_channels_out, filter_size, stride=1, padding = filter_size//2)
-        self.drop = nn.Dropout(p=drop_prob)
-        self.relu = nn.LeakyReLU(negative_slope=neg_slope)
-        self.shuffle = SubpixelShuffle(scale_ratio)
+        self.drop = nn.Dropout(p=params['drop_prob'])
+        self.relu = nn.LeakyReLU(negative_slope=params['relu'])
+        self.shuffle = SubpixelShuffle()
+        self.proj = nn.Linear(num_channels_out, num_channels_out//2, bias=False)
 
 
 
@@ -33,11 +35,20 @@ class UpsamplingBlock(nn.Module):
             residual (torch.tensor): corresponding shape signal from
                 downsampling to concatenate with upsample
         """
+
+        # print('in up block\nshape of input:{}\nshape of residual:{}'.format(
+        #     input_signal.shape, residual.shape
+        # ))
+
         out = self.conv(input_signal)
+        # print('shape after conv:', out.shape)
         out = self.drop(out)
         out = self.relu(out)
         out = self.shuffle(out)
-        out = torch.cat([out, residual], dim=1)
+        # print('shape after shuffle:', out.shape)
+        proj_res = self.proj(residual.permute(0,2,1)).permute(0,2,1)
+        # (b, F/2, d) -> (b, F/4, d)
+        out = torch.cat([out, proj_res], dim=1)
         return out
 
 
@@ -48,7 +59,7 @@ class SubpixelShuffle(nn.Module):
 
     """
 
-    def __init__(self, ratio):
+    def __init__(self, ratio=2):
         super(SubpixelShuffle, self).__init__()
         self.ratio = ratio
 

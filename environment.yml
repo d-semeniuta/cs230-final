@@ -16,6 +16,6 @@ dependencies:
   - urllib3
   - pytorch=1.0.0
   - h5py
-  - librosa
   - pip:
     - torch==1.0.0
+    - librosa

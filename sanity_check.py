@@ -11,6 +11,7 @@ import torch.nn.functional as F
 
 from model.layers.downsampling import DownsamplingBlock
 from model.layers.upsampling import UpsamplingBlock, SubpixelShuffle
+from model.model import AudioUNet
 
 def downsampling_sanity_check():
     batch_size = 20
@@ -56,10 +57,29 @@ def upsampling_sanity_check():
     assert(out_signal.shape == (batch_size, F//2, 2*d))
     print('passed upsampling sanity check')
 
+def full_sanity_check():
+    batch_size = 30
+    F = 2
+    d = 2048
+    in_shape = (batch_size, F, d)
+    in_signal = torch.randn(in_shape)
+
+    params = {
+        'drop_prob' : 0.5,
+        'relu'      : 0.2
+    }
+
+    model = AudioUNet(F, 4, params)
+
+    out = model.forward(in_signal)
+    print('in shape', in_signal.shape)
+    print('out shape', out.shape)
+
 def main():
-    downsampling_sanity_check()
-    shuffle_sanity_check()
-    upsampling_sanity_check()
+    # downsampling_sanity_check()
+    # shuffle_sanity_check()
+    # upsampling_sanity_check()
+    full_sanity_check()
 
 
 if __name__ == '__main__':
