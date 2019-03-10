@@ -1,5 +1,13 @@
+pytorch
+python=3.6
+ujson
 numpy
-Pillow
-torch>=0.3
-tabulate
+spacy=2.0.16
+tensorboardX
 tqdm
+urllib3
+pytorch=1.0.0
+h5py
+librosa
+pip:
+torch==1.0.0
