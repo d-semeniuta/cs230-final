@@ -36,16 +36,10 @@ class UpsamplingBlock(nn.Module):
                 downsampling to concatenate with upsample
         """
 
-        # print('in up block\nshape of input:{}\nshape of residual:{}'.format(
-        #     input_signal.shape, residual.shape
-        # ))
-
         out = self.conv(input_signal)
-        # print('shape after conv:', out.shape)
         out = self.drop(out)
         out = self.relu(out)
         out = self.shuffle(out)
-        # print('shape after shuffle:', out.shape)
         proj_res = self.proj(residual.permute(0,2,1)).permute(0,2,1)
         # (b, F/2, d) -> (b, F/4, d)
         out = torch.cat([out, proj_res], dim=1)

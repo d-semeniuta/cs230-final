@@ -60,7 +60,7 @@ def upsampling_sanity_check():
 def full_sanity_check():
     batch_size = 30
     F = 2
-    d = 2048
+    d = 2**13
     in_shape = (batch_size, F, d)
     in_signal = torch.randn(in_shape)
 
@@ -69,11 +69,11 @@ def full_sanity_check():
         'relu'      : 0.2
     }
 
-    model = AudioUNet(F, 4, params)
+    model = AudioUNet(F, 5, params)
 
     out = model.forward(in_signal)
-    print('in shape', in_signal.shape)
-    print('out shape', out.shape)
+    assert(in_signal.shape == out.shape)
+    print('passed full sanity check')
 
 def main():
     # downsampling_sanity_check()
