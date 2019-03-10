@@ -21,7 +21,7 @@ class AudioUNet(nn.Module):
 
         Args:
             num_blocks (int): number of down and upscaling blocks
-            ratio (int): upsampling ratio of
+            ratio (int): upsampling ratio of the audio
         """
         super(AudioUNet, self).__init__()
 
