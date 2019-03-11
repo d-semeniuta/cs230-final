@@ -121,7 +121,7 @@ def snr(x, y):
     Returns: (float) ratio
     """
     x, y = np.squeeze(x, axis=-1), np.squeeze(y, axis=-1)
-    return 10 * np.log(np.norm(y, axis=-1)**2 / np.norm(x - y, axis=-1)**2)
+    return 10 * np.log(np.linalg.norm(y, axis=-1)**2 / np.linalg.norm(x - y, axis=-1)**2)
 
 def lsd(x, y):
     """ Computes Log-spectral distance
