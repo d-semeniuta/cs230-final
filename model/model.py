@@ -121,8 +121,7 @@ def snr(x, y):
     Returns: (float) ratio
     """
     x, y = np.squeeze(x, axis=-1), np.squeeze(y, axis=-1)
-    ret = 10 * torch.log(torch.norm(y, dim=-1)**2 / torch.norm(x - y, dim=-1)**2)
-    return np.array(ret)
+    return 10 * np.log(np.norm(y, axis=-1)**2 / np.norm(x - y, axis=-1)**2)
 
 def lsd(x, y):
     """ Computes Log-spectral distance
