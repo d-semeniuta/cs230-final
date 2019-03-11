@@ -49,7 +49,7 @@ class VCTKDataset(Dataset):
 
         self.X, self.Y = load_h5(datah5)
         if debug:
-            self.X = self.X[10:,:,:]
+            self.X = self.X[:10,:,:]
             self.Y = self.X
 
     def __len__(self):
