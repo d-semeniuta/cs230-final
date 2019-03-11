@@ -83,7 +83,7 @@ def train(model, optimizer, loss_fn, dataloader, metrics, params):
                 # compute all metrics on this batch
                 summary_batch = {metric:metrics[metric](output_batch, labels_batch)
                                  for metric in metrics}
-                summary_batch['loss'] = loss.data
+                summary_batch['loss'] = loss.data.item()
                 summ.append(summary_batch)
 
             # update the average loss
