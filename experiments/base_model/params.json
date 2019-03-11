@@ -11,5 +11,6 @@
   "max_channels": 512,
   "min_filter": 9,
   "relu_slope": 0.2,
-  "num_workers": 4
+  "num_workers": 4,
+  "save_summary_steps": 100
 }
