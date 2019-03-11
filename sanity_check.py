@@ -3,6 +3,8 @@ Audio Super Res Pytorch Sanity Check
 """
 
 import numpy as np
+import argparse
+import os
 
 import torch
 import torch.nn as nn
@@ -11,7 +13,29 @@ import torch.nn.functional as F
 
 from model.layers.downsampling import DownsamplingBlock
 from model.layers.upsampling import UpsamplingBlock, SubpixelShuffle
-from model.model import AudioUNet
+from model.model import AudioUNet, snr, lsd
+
+import utils
+import model.data_loader as data_loader
+
+
+def parseArgs():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--layers', action='store_true', help='layer sanity check')
+    parser.add_argument('--full', action='store_true', help='full sanity check')
+    parser.add_argument('--data', action='store_true', help='data load sanity check')
+    parser.add_argument('--metric', action='store_true', help='metric sanity check')
+
+    parser.add_argument('--train', default='data/vctk/speaker1/vctk-speaker1-train.4.16000.8192.4096.h5', help="Train data path")
+    parser.add_argument('--val', default='data/vctk/speaker1/vctk-speaker1-val.4.16000.8192.4096.h5', help="Val data path")
+    parser.add_argument('--model_dir', default='experiments/base_model', help="Directory containing params.json")
+    args = parser.parse_args()
+
+    json_path = os.path.join(args.model_dir, 'params.json')
+    assert os.path.isfile(json_path), "No json configuration file found at {}".format(json_path)
+    params = utils.Params(json_path)
+    params.cuda = torch.cuda.is_available()
+    return args, params
 
 def downsampling_sanity_check():
     batch_size = 20
@@ -57,17 +81,12 @@ def upsampling_sanity_check():
     assert(out_signal.shape == (batch_size, F//2, 2*d))
     print('passed upsampling sanity check')
 
-def full_sanity_check():
+def full_sanity_check(params):
     batch_size = 30
     F = 2
     d = 2**13
     in_shape = (batch_size, F, d)
     in_signal = torch.randn(in_shape)
-
-    params = {
-        'drop_prob' : 0.5,
-        'relu'      : 0.2
-    }
 
     model = AudioUNet(F, 5, params)
 
@@ -75,12 +94,40 @@ def full_sanity_check():
     assert(in_signal.shape == out.shape)
     print('passed full sanity check')
 
-def main():
-    # downsampling_sanity_check()
-    # shuffle_sanity_check()
-    # upsampling_sanity_check()
-    full_sanity_check()
+def data_check(args, params):
+    data_paths = {
+        'train' : args.train,
+        'val'   : args.val
+    }
 
+    dataloaders = data_loader.fetch_dataloader(['train', 'val'], data_paths, params)
+
+def metric_check(args, params):
+    data_paths = {
+        'train' : args.train,
+        'val'   : args.val
+    }
+    dataloaders = data_loader.fetch_dataloader(['train'], data_paths, params)
+    training_set = dataloaders['train']
+    for x,y in training_set:
+        break
+
+    signal_noise_ratio = snr(x,y)
+    log_spec_dist = lsd(x,y)
+    print(log_spec_dist, log_spec_dist.shape)
+
+def main():
+    args, params = parseArgs()
+    if args.layers:
+        downsampling_sanity_check()
+        shuffle_sanity_check()
+        upsampling_sanity_check()
+    if args.full:
+        full_sanity_check(params)
+    if args.data:
+        data_check(args, params)
+    if args.metric:
+        metric_check(args, params)
 
 if __name__ == '__main__':
     main()

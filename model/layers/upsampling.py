@@ -19,8 +19,8 @@ class UpsamplingBlock(nn.Module):
         super(UpsamplingBlock, self).__init__()
 
         self.conv = nn.Conv1d(num_channels_in, num_channels_out, filter_size, stride=1, padding = filter_size//2)
-        self.drop = nn.Dropout(p=params['drop_prob'])
-        self.relu = nn.LeakyReLU(negative_slope=params['relu'])
+        self.drop = nn.Dropout(p=params.dropout_rate)
+        self.relu = nn.LeakyReLU(negative_slope=params.relu_slope)
         self.shuffle = SubpixelShuffle()
         self.proj = nn.Linear(num_channels_out, num_channels_out//2, bias=False)
 

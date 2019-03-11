@@ -11,17 +11,27 @@ from torch.autograd import Variable
 from tqdm import tqdm
 
 import utils
-import model.net as net
+from model.model import AudioUNet
+import model.model as model_params
 import model.data_loader as data_loader
 from evaluate import evaluate
 
-parser = argparse.ArgumentParser()
-parser.add_argument('--data_dir', default='data/64x64_SIGNS', help="Directory containing the dataset")
-parser.add_argument('--model_dir', default='experiments/base_model', help="Directory containing params.json")
-parser.add_argument('--restore_file', default=None,
-                    help="Optional, name of the file in --model_dir containing weights to reload before \
-                    training")  # 'best' or 'train'
+def parseArgs():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--train', default='data/vctk/speaker1/vctk-speaker1-train.4.16000.8192.4096.h5', help="Train data path")
+    parser.add_argument('--val', default='data/vctk/speaker1/vctk-speaker1-val.4.16000.8192.4096.h5', help="Val data path")
+    parser.add_argument('--model_dir', default='experiments/base_model', help="Directory containing params.json")
+    parser.add_argument('--restore_file', default=None,
+                        help="Optional, name of the file in --model_dir containing weights to reload before \
+                        training")  # 'best' or 'train'
+    parser.add_argument('--debug', action='store_true', help='Debug mode')
+    args = parser.parse_args()
 
+    args.data_paths = {
+        'train' : args.train,
+        'val'   : args.val
+    }
+    return args
 
 def train(model, optimizer, loss_fn, dataloader, metrics, params):
     """Train the model on `num_steps` batches
@@ -54,8 +64,8 @@ def train(model, optimizer, loss_fn, dataloader, metrics, params):
 
             # compute model output and loss
             output_batch = model(train_batch)
-            # loss = loss_fn(output_batch, labels_batch)
-            loss = nn.MSELoss()
+            loss = loss_fn(output_batch, labels_batch)
+            # loss = nn.MSELoss()
 
             # clear previous gradients, compute gradients of all variables wrt loss
             optimizer.zero_grad()
@@ -109,7 +119,7 @@ def train_and_evaluate(model, train_dataloader, val_dataloader, optimizer, loss_
         logging.info("Restoring parameters from {}".format(restore_path))
         utils.load_checkpoint(restore_path, model, optimizer)
 
-    best_val_acc = 0.0
+    best_val_lsd = float('inf')
 
     for epoch in range(params.num_epochs):
         # Run one epoch
@@ -121,8 +131,8 @@ def train_and_evaluate(model, train_dataloader, val_dataloader, optimizer, loss_
         # Evaluate for one epoch on validation set
         val_metrics = evaluate(model, loss_fn, val_dataloader, metrics, params)
 
-        val_acc = val_metrics['accuracy']
-        is_best = val_acc>=best_val_acc
+        val_lsd = val_metrics['lsd']
+        is_best = val_lsd<=best_val_lsd
 
         # Save weights
         utils.save_checkpoint({'epoch': epoch + 1,
@@ -134,7 +144,7 @@ def train_and_evaluate(model, train_dataloader, val_dataloader, optimizer, loss_
         # If best_eval, best_save_path
         if is_best:
             logging.info("- Found new best accuracy")
-            best_val_acc = val_acc
+            best_val_lsd = val_lsd
 
             # Save best val metrics in a json file in the model directory
             best_json_path = os.path.join(model_dir, "metrics_val_best_weights.json")
@@ -145,10 +155,14 @@ def train_and_evaluate(model, train_dataloader, val_dataloader, optimizer, loss_
         utils.save_dict_to_json(val_metrics, last_json_path)
 
 
+def get_model(params, dl):
+    num_blocks = params.blocks
+    return AudioUNet(num_blocks, params)
+
 if __name__ == '__main__':
 
     # Load the parameters from json file
-    args = parser.parse_args()
+    args = parseArgs()
     json_path = os.path.join(args.model_dir, 'params.json')
     assert os.path.isfile(json_path), "No json configuration file found at {}".format(json_path)
     params = utils.Params(json_path)
@@ -167,19 +181,25 @@ if __name__ == '__main__':
     logging.info("Loading the datasets...")
 
     # fetch dataloaders
-    dataloaders = data_loader.fetch_dataloader(['train', 'val'], args.data_dir, params)
+    dataloaders = data_loader.fetch_dataloader(['train', 'val'], args.data_paths,
+                                                params, args.debug)
     train_dl = dataloaders['train']
     val_dl = dataloaders['val']
 
     logging.info("- done.")
 
     # Define the model and optimizer
-    model = net.Net(params).cuda() if params.cuda else net.Net(params)
-    optimizer = optim.Adam(model.parameters(), lr=params.learning_rate)
+    model = get_model(params, val_dl).cuda()
+    model = model.cuda() if params.cuda else model
+    optimizer = optim.Adam(
+        model.parameters(),
+        lr=params.learning_rate,
+        betas=(params.b1, params.b2)
+    )
 
     # fetch loss function and metrics
-    loss_fn = net.loss_fn
-    metrics = net.metrics
+    loss_fn = model_params.loss_fn
+    metrics = model_params.metrics
 
     # Train the model
     logging.info("Starting training for {} epoch(s)".format(params.num_epochs))

@@ -19,7 +19,7 @@ class DownsamplingBlock(nn.Module):
 
         self.conv = nn.Conv1d(num_channels_in, num_channels_out, filter_size, stride=2, padding=filter_size//2)
         self.norm = nn.BatchNorm1d(num_channels_out)
-        self.relu = nn.LeakyReLU(params['relu'])
+        self.relu = nn.LeakyReLU(params.relu_slope)
 
 
     def forward(self, input_signal):
