@@ -26,6 +26,8 @@ def parseArgs():
                         training")  # 'best' or 'train'
     parser.add_argument('--debug', action='store_true', help='Debug mode')
     args = parser.parse_args()
+    if args.debug:
+        args.model_dir = 'experiments/debug'
 
     args.data_paths = {
         'train' : args.train,

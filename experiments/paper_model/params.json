@@ -1,7 +1,7 @@
 {
-  "model_version": "4 blocks",
+  "model_version": "Paper-Params_Smaller-Batch_Smaller-lr",
 
-  "learning_rate": 1e-4,
+  "learning_rate": 5e-5,
   "b1": 0.9,
   "b2": 0.999,
   "blocks": 4,
