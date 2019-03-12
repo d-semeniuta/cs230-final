@@ -1,0 +1,16 @@
+{
+  "model_version": "bigger model",
+
+  "learning_rate": 5e-5,
+  "b1": 0.9,
+  "b2": 0.999,
+  "blocks": 5,
+  "batch_size": 64,
+  "num_epochs": 10,
+  "dropout_rate":0.5,
+  "max_channels": 512,
+  "min_filter": 9,
+  "relu_slope": 0.2,
+  "num_workers": 4,
+  "save_summary_steps": 100
+}
