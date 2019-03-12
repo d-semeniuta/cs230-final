@@ -121,7 +121,7 @@ def snr(x, y):
     Returns: (float) ratio
     """
     x, y = np.squeeze(x, axis=-1), np.squeeze(y, axis=-1)
-    return 10 * np.log(np.linalg.norm(y, axis=-1)**2 / np.linalg.norm(x - y, axis=-1)**2)
+    return np.mean(10 * np.log(np.linalg.norm(y, axis=-1)**2 / np.linalg.norm(x - y, axis=-1)**2))
 
 def lsd(x, y):
     """ Computes Log-spectral distance
@@ -137,7 +137,7 @@ def lsd(x, y):
         diff_squared = (X - Y)**2
         lsd = np.mean(np.sqrt(np.mean(diff_squared, axis=0)))
         lsds.append(lsd)
-    return np.array(lsds)
+    return np.mean(np.array(lsds))
 
 # maintain all metrics required in this dictionary- these are used in the training and evaluation loops
 metrics = {

@@ -107,4 +107,5 @@ venv.bak/
 # data files
 *.h5
 *.tar.gz
+*.tar
 VCTK-Corpus/

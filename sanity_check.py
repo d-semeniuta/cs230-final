@@ -111,10 +111,10 @@ def metric_check(args, params):
     training_set = dataloaders['train']
     for x,y in training_set:
         break
-
+    x, y = np.array(x), np.array(y)
     signal_noise_ratio = snr(x,y)
     log_spec_dist = lsd(x,y)
-    print(log_spec_dist, log_spec_dist.shape)
+    print(signal_noise_ratio, log_spec_dist)
 
 def main():
     args, params = parseArgs()
