@@ -83,12 +83,11 @@ def upsampling_sanity_check():
 
 def full_sanity_check(params):
     batch_size = 30
-    F = 2
+    F = 1
     d = 2**13
-    in_shape = (batch_size, F, d)
+    in_shape = (batch_size, d, F)
     in_signal = torch.randn(in_shape)
-
-    model = AudioUNet(F, 5, params)
+    model = AudioUNet(5, params)
 
     out = model.forward(in_signal)
     assert(in_signal.shape == out.shape)
