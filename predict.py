@@ -34,12 +34,10 @@ def parseArgs():
     return args, params
 
 def runPredictions(args, params):
-
     model = AudioUNet(params.blocks, params)
-    utils.load_checkpoint(os.path.join(args.model_dir, args.restore_file + '.pth.tar'), model)
-
+    utils.load_checkpoint(os.path.join(args.model_dir, 'best.pth.tar'), model)
     file_dir = args.file_dir
-    out_dir = file_dir + '/predictions/'
+    out_dir = args.model_dir + '/predictions/'
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
 
@@ -47,7 +45,7 @@ def runPredictions(args, params):
         for line in f:
             try:
                 print('Upsampling {}'.format(line))
-                file = file_dir + '/' + line.strip()
+                file = os.path.join(file_dir, line.strip())
                 upsample_wav(file, args, model, out_dir)
             except EOFError:
                 print('Error reading {}'.format(line))

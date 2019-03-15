@@ -1,0 +1,4 @@
+./VCTK-Corpus/wav48/p360/p360_059.wav
+./VCTK-Corpus/wav48/p362/p362_087.wav
+./VCTK-Corpus/wav48/p347/p347_021.wav
+./VCTK-Corpus/wav48/p225/p225_366.wav
