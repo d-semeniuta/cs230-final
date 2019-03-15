@@ -6,7 +6,7 @@
   "b2": 0.999,
   "blocks": 5,
   "batch_size": 64,
-  "num_epochs": 20,
+  "num_epochs": 50,
   "dropout_rate":0.5,
   "max_channels": 1024,
   "min_filter": 9,
