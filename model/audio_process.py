@@ -29,10 +29,11 @@ def upsample_wav(wav, args, model, out_dir):
     x_hr, fs = librosa.load(wav, sr=args.sr) # high-res
 
     # downscale signal
-    x_lr = torch.tensor(decimate(x_hr, args.r)) # low-res
+    x_lr = decimate(x_hr, args.r) # low-res
+    x_lr_tensor = torch.from_numpy(x_lr)
 
     # upscale the low-res version
-    out = model.forward(x_lr.reshape((1,len(x_lr),1)))
+    out = model.forward(x_lr_tensor.reshape((1,len(x_lr),1)))
     x_pr = np.array(out.squeeze()) # pred
 
     # crop so that it works with scaling ratio
