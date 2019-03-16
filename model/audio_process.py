@@ -27,13 +27,15 @@ def upsample_wav(wav, args, model, out_dir):
     """ Adapted from kuleshov/audio-super-res """
     # load signal
     x_hr, fs = librosa.load(wav, sr=args.sr) # high-res
+    print(x_hr.shape)
 
     # downscale signal
     x_lr = decimate(x_hr, args.r) # low-res
-    x_lr_tensor = torch.from_numpy(x_lr)
-
+    x_lr_tensor = torch.from_numpy(x_lr.copy()).double()
+    x_lr_tensor = torch.unsqueeze(torch.unsqueeze(x_lr_tensor, 0), -1)
+    print(x_lr_tensor.shape)
     # upscale the low-res version
-    out = model.forward(x_lr_tensor.reshape((1,len(x_lr),1)))
+    out = model.forward(x_lr_tensor)
     x_pr = np.array(out.squeeze()) # pred
 
     # crop so that it works with scaling ratio
