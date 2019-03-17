@@ -1,6 +1,7 @@
 """
 Utils for processing audio
 """
+import pdb
 
 import numpy as np
 import librosa
@@ -46,6 +47,8 @@ def upsample_wav(wav, args, model, out_dir):
     x_sp = spline_up(x_lr, args.r)
     x_sp = x_sp[:len(x_sp) - (len(x_sp) % (2**(model.B+1)))]
     X = torch.from_numpy(x_sp.reshape((1,len(x_sp),1)).copy())
+    X = X.float()
+    pdb.set_trace()
     out = model.forward(X)
     x_pr = np.array(out.squeeze()) # pred
 

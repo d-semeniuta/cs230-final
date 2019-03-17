@@ -3,6 +3,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+import pdb
+
 
 class DownsamplingBlock(nn.Module):
 
@@ -26,6 +28,7 @@ class DownsamplingBlock(nn.Module):
         """
 
         """
+        pdb.set_trace()
         out = self.conv(input_signal)
         out = self.norm(out)
         out = self.relu(out)
