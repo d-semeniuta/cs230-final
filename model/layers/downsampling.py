@@ -3,9 +3,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-import pdb
-
-
 class DownsamplingBlock(nn.Module):
 
     def __init__(self, num_channels_in, num_channels_out, filter_size, params):
@@ -26,9 +23,9 @@ class DownsamplingBlock(nn.Module):
 
     def forward(self, input_signal):
         """
+        Performs forward convolution of the down sampling block
 
         """
-        pdb.set_trace()
         out = self.conv(input_signal)
         out = self.norm(out)
         out = self.relu(out)

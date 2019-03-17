@@ -37,7 +37,8 @@ def runPredictions(args, params):
     model = AudioUNet(params.blocks, params)
     utils.load_checkpoint(os.path.join(args.model_dir, 'best.pth.tar'), model)
     file_dir = args.file_dir
-    out_dir = args.model_dir + '/predictions/'
+    out_dir = os.path.join(args.model_dir, 'predictions/')
+    print(out_dir)
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
 

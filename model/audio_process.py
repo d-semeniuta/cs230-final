@@ -34,6 +34,7 @@ def upsample_wav(wav, args, model, out_dir):
         out_dir (string) : where to write the predictions and results
     """
     # load signal
+    # pdb.set_trace()
     x_hr, fs = librosa.load(wav, sr=args.sr) # high-res
 
     # downscale signal
@@ -48,18 +49,20 @@ def upsample_wav(wav, args, model, out_dir):
     x_sp = x_sp[:len(x_sp) - (len(x_sp) % (2**(model.B+1)))]
     X = torch.from_numpy(x_sp.reshape((1,len(x_sp),1)).copy())
     X = X.float()
-    pdb.set_trace()
     out = model.forward(X)
-    x_pr = np.array(out.squeeze()) # pred
+    x_pr = out.squeeze().detach().numpy()
+    # x_pr = np.array(out.squeeze()) # pred
 
     # crop so that it works with scaling ratio
     x_hr = x_hr[:len(x_pr)]
     x_lr = x_lr[:len(x_pr)]
 
     # save the file
-    outname = out_dir + wav + '.out'
+    filename = wav.split('/')[-1]
+    outname = out_dir + filename + '.out'
+    print('writing to', outname)
     librosa.output.write_wav(outname + '.hr.wav', x_hr, fs)
-    librosa.output.write_wav(outname + '.lr.wav', x_lr, fs / args.r)
+    librosa.output.write_wav(outname + '.lr.wav', x_lr, fs // args.r)
     librosa.output.write_wav(outname + '.pr.wav', x_pr, fs)
 
     # save the spectrum
@@ -67,7 +70,7 @@ def upsample_wav(wav, args, model, out_dir):
     save_spectogram(S, outfile=outname + '.pr.png')
     S = get_spectogram(x_hr, n_fft=2048)
     save_spectogram(S, outfile=outname + '.hr.png')
-    S = get_spectogram(x_lr, n_fft=2048/args.r)
+    S = get_spectogram(x_lr, n_fft=2048//args.r)
     save_spectogram(S, outfile=outname + '.lr.png')
 
 def spline_up(x_lr, r):
@@ -78,7 +81,7 @@ def spline_up(x_lr, r):
         x_lr (np.array) : low res x input
         r (int) : upscaling ratio
     """
-    x_lr = x_lr.squeeze()
+    x_lr = x_lr.flatten()
     x_hr_len = len(x_lr) * r
     x_sp = np.zeros(x_hr_len)
 
