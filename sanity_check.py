@@ -14,6 +14,7 @@ import torch.nn.functional as F
 from model.layers.downsampling import DownsamplingBlock
 from model.layers.upsampling import UpsamplingBlock, SubpixelShuffle
 from model.model import AudioUNet, snr, lsd
+from model_v2.model import AudioUNetV2
 
 import utils
 import model.data_loader as data_loader
@@ -87,7 +88,7 @@ def full_sanity_check(params):
     d = 2**13
     in_shape = (batch_size, d, F)
     in_signal = torch.randn(in_shape)
-    model = AudioUNet(5, params)
+    model = AudioUNetV2(params.blocks, params)
 
     out = model.forward(in_signal)
     assert(in_signal.shape == out.shape)
