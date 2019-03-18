@@ -12,6 +12,7 @@ from tqdm import tqdm
 
 import utils
 from model.model import AudioUNet
+from model.model_v2 import AudioUNetV2
 import model.model as model_params
 import model.data_loader as data_loader
 from evaluate import evaluate
@@ -25,6 +26,7 @@ def parseArgs():
                         help="Optional, name of the file in --model_dir containing weights to reload before \
                         training")  # 'best' or 'train'
     parser.add_argument('--debug', action='store_true', help='Debug mode')
+    parser.add_argument('--v2', action='store_true', help='Run model V2')
     args = parser.parse_args()
     if args.debug:
         args.model_dir = 'experiments/debug'
@@ -157,9 +159,12 @@ def train_and_evaluate(model, train_dataloader, val_dataloader, optimizer, loss_
         utils.save_dict_to_json(val_metrics, last_json_path)
 
 
-def get_model(params, dl):
+def get_model(params, dl, v2=False):
     num_blocks = params.blocks
-    return AudioUNet(num_blocks, params)
+    if v2:
+        return AudioUNetV2(num_blocks, params)
+    else:
+        return AudioUNet(num_blocks, params)
 
 if __name__ == '__main__':
 
@@ -191,7 +196,7 @@ if __name__ == '__main__':
     logging.info("- done.")
 
     # Define the model and optimizer
-    model = get_model(params, val_dl).cuda()
+    model = get_model(params, val_dl, v2=args.v2).cuda()
     model = model.cuda() if params.cuda else model
     optimizer = optim.Adam(
         model.parameters(),
