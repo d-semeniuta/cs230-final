@@ -29,6 +29,7 @@ class AudioUNetV2(nn.Module):
                 params['min_filter'] (int): min size of filter in conv
         """
         super(AudioUNetV2, self).__init__()
+        print('building model v2...')
         self.B = num_blocks
         max_channels = params.max_channels
         min_filter = params.min_filter

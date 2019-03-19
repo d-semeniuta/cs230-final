@@ -12,7 +12,7 @@ from tqdm import tqdm
 
 import utils
 from model.model import AudioUNet
-from model.model_v2 import AudioUNetV2
+from model_v2.model import AudioUNetV2
 import model.model as model_params
 import model.data_loader as data_loader
 from evaluate import evaluate
